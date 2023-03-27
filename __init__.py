@@ -74,7 +74,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     
     # Set the assignment ID
-    assignment_id = "/subscriptions/baba5760-b841-47cc-ad3f-0097b63b2ac7/providers/Microsoft.Authorization/policyAssignments/17069aaf294942ea816b5070"
+    assignment_id = "/subscriptions/baba5760-b841-47cc-ad3f-0097b63b2ac7/providers/Microsoft.Authorization/policyAssignments/0f11c512429c402f90be2664"
 
     # Get the policy assignment
     policy_assignment = policy_client.policy_assignments.get_by_id(assignment_id)
