@@ -1,0 +1,81 @@
+{
+    "mode": "All",
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Authorization/roleAssignments"
+          },
+          {
+            "value": "[last(split(field('Microsoft.Authorization/roleAssignments/roleDefinitionId'),'/'))]",
+            "in": "[parameters('roleDefinitionIds')]"
+          },
+          {
+            "allOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleAssignments/principalId",
+                  "in": "[parameters('exemptPrincipalIDs')]"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleAssignments/principalId",
+                  "in": "[parameters('allowedPrincipalIDs')]"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "parameters": {
+      "roleDefinitionIds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Not Approved Role Definitions",
+          "description": "The list of disallowed role definition IDs."
+        },
+        "defaultValue": [
+          "8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "b24988ac-6180-42a0-ab88-20f7382dd24c"
+        ]
+      },
+      "exemptPrincipalIDs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Exempt Principal IDs",
+          "description": "Any Principal IDs included in this list will not have this Policy applied to them."
+        },
+        "defaultValue": [
+          "e8de9221-a19c-4c81-b814-fd37c6caf9d2"
+        ]
+      },
+      "allowedPrincipalIDs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Principal IDs",
+          "description": "Any Principal IDs included in this list will be allowed to have the specified roles assigned to them."
+        },
+        "defaultValue": [
+          "e2c9b1ee-95a6-4b35-92fc-f8478360145e"
+        ]
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    }
+  }
