@@ -88,29 +88,33 @@ if policy_assignment:
     # Get the existing allowedPrincipalIDs parameter
     existing_allowed_principals = policy_assignment.parameters["allowedPrincipalIDs"].value if "allowedPrincipalIDs" in policy_assignment.parameters else []
 
-    # Add the object ID to the allowedPrincipalIDs list
-    updated_allowed_principals = existing_allowed_principals + [object_id]
+    # Check if the object ID is already in the allowedPrincipalIDs list
+    if object_id in existing_allowed_principals:
+        print("The object ID is already in the allowedPrincipalIDs list.")
+    else:
+        # Add the object ID to the allowedPrincipalIDs list
+        updated_allowed_principals = existing_allowed_principals + [object_id]
 
-    # Define the updated policy parameters
-    updated_policy_parameters = {
-        "allowedPrincipalIDs": {
-            "value": updated_allowed_principals
-        }
-    }
-
-    # Update the policy assignment with the new parameters
-    updated_policy_assignment = policy_client.policy_assignments.create(
-        policy_assignment.scope,
-        policy_assignment.name,
-        {
-            "location": policy_assignment.location,
-            "properties": {
-                "policyDefinitionId": policy_assignment.policy_definition_id,
-                "parameters": updated_policy_parameters
+        # Define the updated policy parameters
+        updated_policy_parameters = {
+            "allowedPrincipalIDs": {
+                "value": updated_allowed_principals
             }
         }
-    )
-   
-    print("The policy assignment has been updated with the new allowedPrincipalIDs.")
+
+        # Update the policy assignment with the new parameters
+        updated_policy_assignment = policy_client.policy_assignments.create(
+            policy_assignment.scope,
+            policy_assignment.name,
+            {
+                "location": policy_assignment.location,
+                "properties": {
+                    "policyDefinitionId": policy_assignment.policy_definition_id,
+                    "parameters": updated_policy_parameters
+                }
+            }
+        )
+       
+        print("The policy assignment has been updated with the new allowedPrincipalIDs.")
 else:
     print(f"Could not find the policy assignment with the ID '{assignment_id}'.")
