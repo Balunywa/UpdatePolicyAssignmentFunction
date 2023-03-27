@@ -1,72 +1,116 @@
-import logging
-import azure.functions as func
-import json
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.resource import ResourceManagementClient
 import requests
-import os
 
-def main(event: func.EventGridEvent):
-    logging.info('Python EventGrid trigger function processed an event: %s', event.get_json())
+from azure.mgmt.policyinsights.models import QueryOptions
 
-    event_data = event.get_json()
+from azure.identity import ClientSecretCredential
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.resource import ResourceManagementClient
+from azure.mgmt.resource.policy import PolicyClient
+import requests
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.policyinsights import PolicyInsightsClient
+from azure.mgmt.policyinsights.models import PolicyStatesResource
+from azure.identity import ClientSecretCredential
+from azure.mgmt.policyinsights import PolicyInsightsClient
+from azure.mgmt.resource import ResourceManagementClient
+import requests
+from azure.mgmt.policyinsights import PolicyInsightsClient
+from azure.mgmt.policyinsights.models import QueryOptions
+from azure.identity import DefaultAzureCredential
 
-    # Check if the event is for Azure Spring Resource Manager creation
-    if event_data['eventType'] == 'Microsoft.Resources.ResourceWriteSuccess' and \
-       event_data['data']['operationName'] == 'Microsoft.Resources/deployments/write' and \
-       'spring' in event_data['data']['resourceUri']:
+# Set the target application name
+target_app_name = "Azure Spring Cloud Resource Management"
 
-        # Extract the Object ID from event data
-        object_id = event_data['data']['properties']['servicePrincipalProfile']['clientId']
+# Set your Azure AD credentials
+tenant_id = "fef3ddf9-5e8d-4606-907f-c575d0732655"
+client_id = "b01e8aaa-1c3f-4cb4-b865-99ab718370b3"
+client_secret = "Gfc8Q~kWWHUtwy3wZP2zbMFR2.u915H_RoRM.bG6"
 
-        # Update the allowed list of Object IDs in the policy assignment and reassign the policy
-        update_policy_assignment(object_id)
+# Authenticate using the ClientSecretCredential
+credential = ClientSecretCredential(tenant_id, client_id, client_secret)
 
-def update_policy_assignment(object_id):
-    # Set your tenant ID, subscription ID, client ID, and client secret
-    tenant_id = os.environ['TENANT_ID']
-    subscription_id = os.environ['SUBSCRIPTION_ID']
-    client_id = os.environ['CLIENT_ID']
-    client_secret = os.environ['CLIENT_SECRET']
-    resource_group = os.environ['RESOURCE_GROUP']
-    policy_assignment_name = os.environ['POLICY_ASSIGNMENT_NAME']
+# Get an access token with the required scope
+token = credential.get_token("https://graph.microsoft.com/.default")
 
-    # Authenticate and get access token
-    authority_url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/token'
-    token_payload = {
-        'grant_type': 'client_credentials',
-        'client_id': client_id,
-        'client_secret': client_secret,
-        'resource': 'https://management.azure.com/'
-    }
-    token_response = requests.post(authority_url, data=token_payload).json()
-    access_token = token_response['access_token']
+# Set up the headers for the Microsoft Graph API request
+headers = {
+    "Authorization": f"Bearer {token.token}",
+    "Content-Type": "application/json"
+}
 
-    # Get current policy assignment
-    policy_assignment_url = f'https://management.azure.com/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Authorization/policyAssignments/{policy_assignment_name}?api-version=2021-06-01'
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json'
-    }
-    policy_assignment_response = requests.get(policy_assignment_url, headers=headers).json()
+# Define the Graph API endpoint for listing service principals
+service_principals_url = "https://graph.microsoft.com/v1.0/servicePrincipals"
 
-    # Add the new Object ID to the allowed list
-    allowed_principal_ids = policy_assignment_response['properties']['parameters']['allowedPrincipalIDs']['value']
-    allowed_principal_ids.append(object_id)
 
-    # Update the policy assignment with the new allowed list of Object IDs
-    policy_assignment_update_payload = {
-    'properties': {
-        'parameters': {
-            'allowedPrincipalIDs': {
-                'value': allowed_principal_ids
-            }
+subscription_id = "c801a0b0-c54c-4193-9caa-4d56a72099ad"
+
+resource_client = ResourceManagementClient(credential, subscription_id)
+policy_client = PolicyClient(credential, subscription_id)
+policyInsightsClient = PolicyInsightsClient(credential, subscription_id)
+
+def get_enterprise_app_object_id(app_name):
+    try:
+        response = requests.get(service_principals_url, headers=headers)
+
+        if response.status_code == 200:
+            service_principals = response.json()["value"]
+
+            # Find the target enterprise application
+            for sp in service_principals:
+                if sp["displayName"].lower() == app_name.lower():
+                    return sp["id"]
+
+            print(f"Could not find the enterprise application with the name '{app_name}'.")
+            return None
+
+        else:
+            print(f"Error retrieving service principals: {response.status_code} - {response.text}")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred while fetching the enterprise application object ID: {e}")
+        return None
+    
+
+object_id = get_enterprise_app_object_id(target_app_name)
+print(f"The object ID for '{target_app_name}' is: {object_id}")
+
+
+# Set the assignment ID
+assignment_id = "/subscriptions/c801a0b0-c54c-4193-9caa-4d56a72099ad/providers/Microsoft.Authorization/policyAssignments/428fc04ec56945b29e24ad07"
+
+# Get the policy assignment
+policy_assignment = policy_client.policy_assignments.get_by_id(assignment_id)
+
+if policy_assignment:
+    # Get the existing allowedPrincipalIDs parameter
+    existing_allowed_principals = policy_assignment.parameters["allowedPrincipalIDs"].value if "allowedPrincipalIDs" in policy_assignment.parameters else []
+
+    # Add the object ID to the allowedPrincipalIDs list
+    updated_allowed_principals = existing_allowed_principals + [object_id]
+
+    # Define the updated policy parameters
+    updated_policy_parameters = {
+        "allowedPrincipalIDs": {
+            "value": updated_allowed_principals
         }
     }
-   }
-  
-    policy_assignment_update_response = requests.put(policy_assignment_url, headers=headers, json=policy_assignment_update_payload)
 
-    if policy_assignment_update_response.status_code == 200:
-        logging.info(f'Updated policy assignment {policy_assignment_name} with new Object ID: {object_id}')
-    else:
-        logging.error(f'Failed to update policy assignment {policy_assignment_name}')
-
+    # Update the policy assignment with the new parameters
+    updated_policy_assignment = policy_client.policy_assignments.create(
+        policy_assignment.scope,
+        policy_assignment.name,
+        {
+            "location": policy_assignment.location,
+            "properties": {
+                "policyDefinitionId": policy_assignment.policy_definition_id,
+                "parameters": updated_policy_parameters
+            }
+        }
+    )
+   
+    print("The policy assignment has been updated with the new allowedPrincipalIDs.")
+else:
+    print(f"Could not find the policy assignment with the ID '{assignment_id}'.")
