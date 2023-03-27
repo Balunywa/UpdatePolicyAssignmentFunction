@@ -1,3 +1,5 @@
+import logging
+import azure.functions as func
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.policyinsights.models import QueryOptions
@@ -7,8 +9,10 @@ from azure.mgmt.policyinsights import PolicyInsightsClient
 from azure.mgmt.policyinsights.models import PolicyStatesResource
 from azure.identity import ClientSecretCredential
 import requests
+import json
 
-
+def main(event: func.EventGridEvent) -> None:
+    logging.info('Python Event Grid trigger function processed an event: %s', event.get_json())
 
 # Set the target application name
 target_app_name = "Azure Spring Cloud Resource Management"
