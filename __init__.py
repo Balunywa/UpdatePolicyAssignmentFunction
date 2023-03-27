@@ -72,7 +72,7 @@ object_id = get_enterprise_app_object_id(target_app_name)
 print(f"The object ID for '{target_app_name}' is: {object_id}")
 
 # Set the assignment ID
-assignment_id = "/subscriptions/c801a0b0-c54c-4193-9caa-4d56a72099ad/providers/Microsoft.Authorization/policyAssignments/428fc04ec56945b29e24ad07"
+assignment_id = "/subscriptions/baba5760-b841-47cc-ad3f-0097b63b2ac7/providers/Microsoft.Authorization/policyAssignments/17069aaf294942ea816b5070"
 
 # Get the policy assignment
 policy_assignment = policy_client.policy_assignments.get_by_id(assignment_id)
