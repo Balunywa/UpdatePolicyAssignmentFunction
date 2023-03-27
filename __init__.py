@@ -11,8 +11,8 @@ from azure.identity import ClientSecretCredential
 import requests
 import json
 
-def main(event: func.EventGridEvent) -> None:
-    logging.info('Python Event Grid trigger function processed an event: %s', event.get_json())
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
 
 # Set the target application name
 target_app_name = "Azure Spring Cloud Resource Management"
@@ -71,7 +71,6 @@ def get_enterprise_app_object_id(app_name):
 object_id = get_enterprise_app_object_id(target_app_name)
 print(f"The object ID for '{target_app_name}' is: {object_id}")
 
-
 # Set the assignment ID
 assignment_id = "/subscriptions/c801a0b0-c54c-4193-9caa-4d56a72099ad/providers/Microsoft.Authorization/policyAssignments/428fc04ec56945b29e24ad07"
 
@@ -112,3 +111,4 @@ if policy_assignment:
         print("The policy assignment has been updated with the new allowedPrincipalIDs.")
 else:
     print(f"Could not find the policy assignment with the ID '{assignment_id}'.")
+     
