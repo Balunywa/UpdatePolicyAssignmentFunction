@@ -20,7 +20,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(validation_code)
 
     # Set the target application name
-    target_app_name = "Azure Spring Cloud Resource Management"
+    app_name = "Azure Spring Cloud Resource Management"
 
     # Set your Azure AD credentials
     tenant_id = "46ebbfcd-0b34-421b-95b6-0d3be04f5baf"
@@ -69,8 +69,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             print(f"An error occurred while fetching the enterprise application object ID: {e}")
             return None
 
-    object_id = get_enterprise_app_object_id(target_app_name)
-    logging.info(f"The object ID for '{target_app_name}' is: {object_id}")
+    object_id = get_enterprise_app_object_id(app_name)
+    logging.info(f"The object ID for '{app_name}' is: {object_id}")
 
     
     # Set the assignment ID
