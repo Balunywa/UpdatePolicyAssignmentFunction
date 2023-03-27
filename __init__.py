@@ -1,24 +1,14 @@
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import ResourceManagementClient
-import requests
-
 from azure.mgmt.policyinsights.models import QueryOptions
-
 from azure.identity import ClientSecretCredential
-from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.policy import PolicyClient
-import requests
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.policyinsights import PolicyInsightsClient
 from azure.mgmt.policyinsights.models import PolicyStatesResource
 from azure.identity import ClientSecretCredential
-from azure.mgmt.policyinsights import PolicyInsightsClient
-from azure.mgmt.resource import ResourceManagementClient
 import requests
-from azure.mgmt.policyinsights import PolicyInsightsClient
-from azure.mgmt.policyinsights.models import QueryOptions
-from azure.identity import DefaultAzureCredential
+
+
 
 # Set the target application name
 target_app_name = "Azure Spring Cloud Resource Management"
