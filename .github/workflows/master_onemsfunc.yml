@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python project to Azure Function App - onems
+name: Build and deploy Python project to Azure Function App - onemsfunc
 
 on:
   push:
@@ -62,9 +62,9 @@ jobs:
         uses: Azure/functions-action@v1
         id: deploy-to-function
         with:
-          app-name: 'onems'
+          app-name: 'onemsfunc'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_12F2B1652E4D4E1D856C4B113C336018 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7625AEA1C9F24B97BE8B50B9D926D5E4 }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
