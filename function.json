@@ -1,12 +1,14 @@
 {
+  "scriptFile": "__init__.py",
   "bindings": [
     {
-      "type": "eventGridTrigger",
-      "name": "event",
-      "direction": "in"
+      "type": "eventHubTrigger",
+      "name": "events",
+      "direction": "in",
+      "eventHubName": "onems-deny-policy",
+      "connection": "",
+      "cardinality": "many",
+      "consumerGroup": "$Default"
     }
-  ],
-  "scriptFile": "__init__.py",
-  "entryPoint": "main"
+  ]
 }
-
