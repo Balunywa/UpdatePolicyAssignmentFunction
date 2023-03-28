@@ -1,4 +1,4 @@
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, ClientSecretCredential
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.policyinsights.models import QueryOptions
 from azure.identity import ClientSecretCredential
@@ -6,17 +6,29 @@ from azure.mgmt.resource.policy import PolicyClient
 from azure.mgmt.policyinsights import PolicyInsightsClient
 from azure.mgmt.policyinsights.models import PolicyStatesResource
 from azure.identity import ClientSecretCredential
+from azure.keyvault.secrets import SecretClient
 import requests
 
 
 
 # Set the target application name
-target_app_name = "Azure Spring Cloud Resource Management"
+#target_app_name = "Azure Spring Cloud Resource Management"
 
-# Set your Azure AD credentials
-tenant_id = "fef3ddf9-5e8d-4606-907f-c575d0732655"
-client_id = "b01e8aaa-1c3f-4cb4-b865-99ab718370b3"
-client_secret = "Gfc8Q~kWWHUtwy3wZP2zbMFR2.u915H_RoRM.bG6"
+# Set the Key Vault URL
+#key_vault_url = "https://<your-key-vault-name>.vault.azure.net/"
+key_vault_url = "https://deny-all-keys.vault.azure.net/"
+
+# Initialize the SecretClient with the DefaultAzureCredential
+secret_client = SecretClient(vault_url=key_vault_url, credential=DefaultAzureCredential())
+
+# Retrieve the secrets from Azure Key Vault
+tenant_id = secret_client.get_secret("tenantId").value
+client_id = secret_client.get_secret("clientId").value
+client_secret = secret_client.get_secret("clientSecret").value
+
+# Retrieve the target_app_name from Azure Key Vault
+target_app_name = secret_client.get_secret("targetAppName").value
+
 
 # Authenticate using the ClientSecretCredential
 credential = ClientSecretCredential(tenant_id, client_id, client_secret)
