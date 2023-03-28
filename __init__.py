@@ -18,9 +18,9 @@ def main(event: func.EventGridEvent):
     target_app_name = "Azure Spring Cloud Resource Management"
 
     # Set your Azure AD credentials
-    tenant_id = "fef3ddf9-5e8d-4606-907f-c575d0732655"
-    client_id = "b01e8aaa-1c3f-4cb4-b865-99ab718370b3"
-    client_secret = "Gfc8Q~kWWHUtwy3wZP2zbMFR2.u915H_RoRM.bG6"
+    tenant_id = "46ebbfcd-0b34-421b-95b6-0d3be04f5baf"
+    client_id = "6f8d280c-dbf1-464d-b79f-9918efbba95d"
+    client_secret = "N_X8Q~ourPUd0rBZV~E1nShTfnBrfXZwZENuvaKh"
 
     # Authenticate using the ClientSecretCredential
     credential = ClientSecretCredential(tenant_id, client_id, client_secret)
@@ -37,7 +37,7 @@ def main(event: func.EventGridEvent):
     # Define the Graph API endpoint for listing service principals
     service_principals_url = "https://graph.microsoft.com/v1.0/servicePrincipals"
 
-    subscription_id = "c801a0b0-c54c-4193-9caa-4d56a72099ad"
+    subscription_id = "baba5760-b841-47cc-ad3f-0097b63b2ac7"
 
     resource_client = ResourceManagementClient(credential, subscription_id)
     policy_client = PolicyClient(credential, subscription_id)
@@ -71,7 +71,7 @@ def main(event: func.EventGridEvent):
 
 
     # Set the assignment ID
-    assignment_id = "/subscriptions/c801a0b0-c54c-4193-9caa-4d56a72099ad/providers/Microsoft.Authorization/policyAssignments/428fc04ec56945b29e24ad07"
+    assignment_id = "/subscriptions/baba5760-b841-47cc-ad3f-0097b63b2ac7/providers/Microsoft.Authorization/policyAssignments/9db808725fce48ab835cc22d"
 
     # Get the policy assignment
     policy_assignment = policy_client.policy_assignments.get_by_id(assignment_id)
